@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Profile Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.9);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            background: white;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .search-btn {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.4);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .profile-info {
+            flex: 1;
+            color: white;
+        }
+
+        .profile-info h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .profile-info p {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .stat-label {
+            color: rgba(255,255,255,0.8);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .languages-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .languages-section h3 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .language-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .language-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+
+        .language-progress {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s ease;
+        }
+
+        .repos-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .repos-section h3 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .repo-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .repo-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .repo-name {
+            color: #4fc3f7;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-decoration: none;
+        }
+
+        .repo-name:hover {
+            text-decoration: underline;
+        }
+
+        .repo-desc {
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .repo-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .error {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.5);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-info h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 GitHub Profile Analyzer</h1>
+            <p>Discover insights and statistics from any GitHub profile</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="usernameInput" 
+                    class="search-input" 
+                    placeholder="Enter GitHub username (e.g., octocat)"
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button onclick="analyzeProfile()" class="search-btn" id="searchBtn">
+                    Analyze Profile
+                </button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            Analyzing profile...
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="results" class="results">
+            <div class="profile-header">
+                <img id="userAvatar" class="avatar" src="" alt="User Avatar">
+                <div class="profile-info">
+                    <h2 id="userName"></h2>
+                    <p id="userBio"></p>
+                    <p id="userLocation"></p>
+                    <p id="userCompany"></p>
+                    <p id="joinDate"></p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="publicRepos">0</div>
+                    <div class="stat-label">Public Repos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="followers">0</div>
+                    <div class="stat-label">Followers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="following">0</div>
+                    <div class="stat-label">Following</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalStars">0</div>
+                    <div class="stat-label">Total Stars</div>
+                </div>
+            </div>
+
+            <div class="languages-section">
+                <h3>🔥 Most Used Languages</h3>
+                <div id="languagesList"></div>
+            </div>
+
+            <div class="repos-section">
+                <h3>⭐ Top Repositories</h3>
+                <div id="reposList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userData = null;
+        let reposData = null;
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                analyzeProfile();
+            }
+        }
+
+        async function analyzeProfile() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (!username) {
+                showError('Please enter a GitHub username');
+                return;
+            }
+
+            showLoading(true);
+            hideError();
+            hideResults();
+
+            try {
+                // Fetch user data and repos in parallel
+                const [userResponse, reposResponse] = await Promise.all([
+                    fetch(`https://api.github.com/users/${username}`),
+                    fetch(`https://api.github.com/users/${username}/repos?sort=stars&per_page=100`)
+                ]);
+
+                if (!userResponse.ok) {
+                    throw new Error('User not found');
+                }
+
+                userData = await userResponse.json();
+                reposData = await reposResponse.json();
+
+                displayResults();
+                showResults();
+
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayResults() {
+            // Profile header
+            document.getElementById('userAvatar').src = userData.avatar_url;
+            document.getElementById('userName').textContent = userData.name || userData.login;
+            document.getElementById('userBio').textContent = userData.bio || 'No bio available';
+            document.getElementById('userLocation').textContent = userData.location ? `📍 ${userData.location}` : '';
+            document.getElementById('userCompany').textContent = userData.company ? `🏢 ${userData.company}` : '';
+            document.getElementById('joinDate').textContent = `📅 Joined ${new Date(userData.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}`;
+
+            // Stats
+            const totalStars = reposData.reduce((sum, repo) => sum + repo.stargazers_count, 0);
+            document.getElementById('publicRepos').textContent = userData.public_repos;
+            document.getElementById('followers').textContent = userData.followers;
+            document.getElementById('following').textContent = userData.following;
+            document.getElementById('totalStars').textContent = totalStars;
+
+            // Languages
+            displayLanguages();
+
+            // Top repositories
+            displayTopRepos();
+        }
+
+        function displayLanguages() {
+            const languages = {};
+            
+            // Count languages from repos
+            reposData.forEach(repo => {
+                if (repo.language) {
+                    languages[repo.language] = (languages[repo.language] || 0) + 1;
+                }
+            });
+
+            // Sort and get top 5
+            const sortedLanguages = Object.entries(languages)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5);
+
+            const total = Object.values(languages).reduce((sum, count) => sum + count, 0);
+            const languagesList = document.getElementById('languagesList');
+            
+            if (sortedLanguages.length === 0) {
+                languagesList.innerHTML = '<p style="color: rgba(255,255,255,0.7); text-align: center;">No language data available</p>';
+                return;
+            }
+
+            const languageColors = {
+                JavaScript: '#f1e05a',
+                Python: '#3572A5',
+                Java: '#b07219',
+                TypeScript: '#2b7489',
+                HTML: '#e34c26',
+                CSS: '#1572B6',
+                PHP: '#4F5D95',
+                C: '#555555',
+                'C++': '#f34b7d',
+                'C#': '#239120',
+                Go: '#00ADD8',
+                Rust: '#dea584',
+                Swift: '#ffac45',
+                Kotlin: '#F18E33'
+            };
+
+            languagesList.innerHTML = sortedLanguages.map(([language, count]) => {
+                const percentage = ((count / total) * 100).toFixed(1);
+                const color = languageColors[language] || '#6c757d';
+                
+                return `
+                    <div class="language-item">
+                        <span>${language}</span>
+                        <div class="language-bar">
+                            <div class="language-progress" style="width: ${percentage}%; background: ${color};"></div>
+                        </div>
+                        <span>${percentage}%</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayTopRepos() {
+            const topRepos = reposData
+                .sort((a, b) => b.stargazers_count - a.stargazers_count)
+                .slice(0, 5);
+
+            const reposList = document.getElementById('reposList');
+            
+            if (topRepos.length === 0) {
+                reposList.innerHTML = '<p style="color: rgba(255,255,255,0.7); text-align: center;">No public repositories found</p>';
+                return;
+            }
+
+            reposList.innerHTML = topRepos.map(repo => `
+                <div class="repo-item">
+                    <a href="${repo.html_url}" target="_blank" class="repo-name">
+                        ${repo.name}
+                    </a>
+                    <div class="repo-desc">
+                        ${repo.description || 'No description available'}
+                    </div>
+                    <div class="repo-stats">
+                        <span>⭐ ${repo.stargazers_count}</span>
+                        <span>🍴 ${repo.forks_count}</span>
+                        <span>👁️ ${repo.watchers_count}</span>
+                        ${repo.language ? `<span>💻 ${repo.language}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('searchBtn').disabled = show;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function showResults() {
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function hideResults() {
+            document.getElementById('results').style.display = 'none';
+        }
+
+        // Demo with a popular GitHub user
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('usernameInput').value = 'octocat';
+        });
+    </script>
+</body>
+</html>
