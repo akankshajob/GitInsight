@@ -27,11 +27,7 @@ Built with modern web technologies and featuring a stunning **glass-morphism** d
 
 ---
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Modern web browser  
-- Internet connection  
+ 
 
 ### Installation
 ```bash
